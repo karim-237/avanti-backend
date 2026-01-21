@@ -19,6 +19,8 @@ import productCategoriesRoutes from "./routes/productCategories.routes.js";
 import recipeRoutes from "./routes/recipes.routes.js";
 import searchRoutes from "./routes/search.routes.js";
 import searchBlogsRoutes from "./routes/searchBlogs.routes.js";
+import searchRecipesRoutes from "./routes/searchRecipes.routes.js";
+
 
 
  
@@ -46,6 +48,8 @@ app.use("/api/product-categories", productCategoriesRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api", searchRoutes);
 app.use("/api/search/blogs", searchBlogsRoutes);
+app.use("/api/search/recipes", searchRecipesRoutes);
+
 
 
 
