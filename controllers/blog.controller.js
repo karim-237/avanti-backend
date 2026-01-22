@@ -147,3 +147,36 @@ export const getBlogBySlug = async (req, res) => {
 };
 
 
+
+// Récupérer les 5 derniers blogs publiés
+export const getLatestBlogs = async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT 
+        id,
+        title,
+        slug,
+        short_description,
+        image_url,
+        publish_date
+      FROM blogs
+      WHERE status = 'published'
+      ORDER BY publish_date DESC
+      LIMIT 5
+      `
+    );
+
+    res.status(200).json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error("Get latest blogs error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la récupération des derniers blogs"
+    });
+  }
+};
+
