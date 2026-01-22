@@ -6,10 +6,10 @@ import {
 
 const router = express.Router();
 
-// Récupérer les commentaires d’un blog
-router.get("/recipe/:recipeId", addRecipeComment);
+// Récupérer les commentaires d’une recette
+router.get("/recipe/:recipeId", getRecipeComments);
 
-// Ajouter un commentaire à un blog
-router.post("/recipe", getRecipeComments);
+// Ajouter un commentaire à une recette
+router.post("/recipe", addRecipeComment);
 
 export default router;
