@@ -5,27 +5,27 @@ import pool from "../config/db.js";
 // =======================================================
 export const addRecipeComment = async (req, res) => {
   try {
-    const { recipe_id, author_name, email, message } = req.body;
+    const { recipe_id, author_name, email, comment  } = req.body;
 
-    if (!recipe_id || !author_name || !email || !message) {
+    if (!recipe_id || !author_name || !email || !comment ) {
       return res.status(400).json({
         success: false,
-        message: "Champs requis manquants"
+        comment : "Champs requis manquants"
       });
     }
 
     const { rows } = await pool.query(
       `
-      INSERT INTO recipe_comments (recipe_id, author_name, email, message)
+      INSERT INTO recipe_comments (recipe_id, author_name, email, comment )
       VALUES ($1, $2, $3, $4)
-      RETURNING id, recipe_id, author_name, email, message, created_at
+      RETURNING id, recipe_id, author_name, email, comment , created_at
       `,
-      [recipe_id, author_name, email, message]
+      [recipe_id, author_name, email, comment ]
     );
 
     res.status(201).json({
       success: true,
-      message: "Commentaire ajouté avec succès",
+      comment : "Commentaire ajouté avec succès",
       data: rows[0]
     });
 
@@ -33,7 +33,7 @@ export const addRecipeComment = async (req, res) => {
     console.error("Add recipe comment error:", error);
     res.status(500).json({
       success: false,
-      message: "Erreur lors de l'ajout du commentaire"
+      comment : "Erreur lors de l'ajout du commentaire"
     });
   }
 };
@@ -55,7 +55,7 @@ export const getRecipeComments = async (req, res) => {
 
     const { rows: comments } = await pool.query(
       `
-      SELECT id, author_name, email, message, created_at
+      SELECT id, author_name, email, comment , created_at
       FROM recipe_comments
       WHERE recipe_id = $1
       ORDER BY created_at ASC
@@ -84,7 +84,7 @@ export const getRecipeComments = async (req, res) => {
     console.error("Get recipe comments error:", error);
     res.status(500).json({
       success: false,
-      message: "Erreur lors de la récupération des commentaires"
+      comment : "Erreur lors de la récupération des commentaires"
     });
   }
 };
