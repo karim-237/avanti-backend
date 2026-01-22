@@ -6,7 +6,7 @@ export const getProductCategories = async (req, res) => {
 
     const result = await pool.query(
       `
-      SELECT id, name, slug
+      SELECT id, name, slug, image_path
       FROM product_categories
       WHERE is_active = true
       ORDER BY id ASC
