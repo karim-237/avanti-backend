@@ -44,12 +44,12 @@ export const addRecipeComment = async (req, res) => {
 // =======================================================
 export const getRecipeComments = async (req, res) => {
   try {
-    const { blogId } = req.params;
+    const { recipeId } = req.params;
 
-    if (!blogId) {
+    if (!recipeId) {
       return res.status(400).json({
         success: false,
-        message: "blogId manquant"
+        message: "recipeId manquant"
       });
     }
 
@@ -60,7 +60,7 @@ export const getRecipeComments = async (req, res) => {
       WHERE recipe_id = $1
       ORDER BY created_at ASC
       `,
-      [blogId]
+      [recipeId]
     );
 
     const { rows: countRows } = await pool.query(
@@ -69,7 +69,7 @@ export const getRecipeComments = async (req, res) => {
       FROM recipe_comments
       WHERE recipe_id = $1
       `,
-      [blogId]
+      [recipeId]
     );
 
     res.status(200).json({
