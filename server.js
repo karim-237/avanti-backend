@@ -21,6 +21,7 @@ import searchRoutes from "./routes/search.routes.js";
 import searchBlogsRoutes from "./routes/searchBlogs.routes.js";
 import searchRecipesRoutes from "./routes/searchRecipes.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
+import recipe_commentRoutes from "./routes/recipe_comment.routes.js";
 
 
 
@@ -51,6 +52,7 @@ app.use("/api", searchRoutes);
 app.use("/api/search/blogs", searchBlogsRoutes);
 app.use("/api/search/recipes", searchRecipesRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/recipe_comments", recipe_commentRoutes);
 
 
 
