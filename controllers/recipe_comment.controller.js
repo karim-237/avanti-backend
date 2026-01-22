@@ -5,9 +5,9 @@ import pool from "../config/db.js";
 // =======================================================
 export const addRecipeComment = async (req, res) => {
   try {
-    const { recipe_id, author_name, email, comment  } = req.body;
+    const { recipe_id, name, email, comment  } = req.body;
 
-    if (!recipe_id || !author_name || !email || !comment ) {
+    if (!recipe_id || !name || !email || !comment ) {
       return res.status(400).json({
         success: false,
         comment : "Champs requis manquants"
@@ -16,11 +16,11 @@ export const addRecipeComment = async (req, res) => {
 
     const { rows } = await pool.query(
       `
-      INSERT INTO recipe_comments (recipe_id, author_name, email, comment )
+      INSERT INTO recipe_comments (recipe_id, name, email, comment )
       VALUES ($1, $2, $3, $4)
-      RETURNING id, recipe_id, author_name, email, comment , created_at
+      RETURNING id, recipe_id, name, email, comment , created_at
       `,
-      [recipe_id, author_name, email, comment ]
+      [recipe_id, name, email, comment ]
     );
 
     res.status(201).json({
@@ -55,7 +55,7 @@ export const getRecipeComments = async (req, res) => {
 
     const { rows: comments } = await pool.query(
       `
-      SELECT id, author_name, email, comment , created_at
+      SELECT id, name, email, comment , created_at
       FROM recipe_comments
       WHERE recipe_id = $1
       ORDER BY created_at ASC
