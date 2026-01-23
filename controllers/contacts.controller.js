@@ -1,5 +1,7 @@
 // controllers/contactController.js
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 
 // =======================================================
 // 📩 Envoyer message de contact par email
