@@ -1,8 +1,9 @@
+// routes/contactRoutes.js
 import express from "express";
-import { getContacts } from "../controllers/contacts.controller.js";
+import { sendContactMessage } from "../controllers/contacts.controller.js";
 
 const router = express.Router();
 
-router.get("/", getContacts);
+router.post("/", sendContactMessage);
 
 export default router;
