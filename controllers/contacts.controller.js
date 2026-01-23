@@ -45,7 +45,7 @@ export const sendContactMessage = async (req, res) => {
 
     const mailOptions = {
       from: `"Formulaire Contact AVANTI" <${process.env.GMAIL_USER}>`,
-      to: "avanticameroun@gmail.com", // 🎯 destination finale
+      to: "karimduval20@gmail.com", // 🎯 destination finale
       replyTo: email,
       subject: subject || "Nouveau message depuis le site AVANTI",
       html: `
