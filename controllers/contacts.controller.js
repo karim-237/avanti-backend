@@ -37,6 +37,10 @@ export const sendContactMessage = async (req, res) => {
       },
     });
 
+    if(transporter){
+      console.log('transporter OK')
+    }
+
     // Test de connexion SMTP avant envoi
     await transporter.verify().catch(err => {
       console.error("❌ Erreur de connexion SMTP :", err);
