@@ -24,7 +24,7 @@ export const sendContactMessage = async (req, res) => {
         success: false,
         message: "Erreur de configuration du serveur mail"
       });
-    }
+    } else(console.log(process.env.GMAIL_USER, process.env.GMAIL_APP_PASSWORD))
 
     // 🔐 Transport Gmail
     const transporter = nodemailer.createTransport({
