@@ -1,15 +1,14 @@
-// controllers/contactController.js
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-dotenv.config();
+// controllers/contacts.controller.js
+import pool from "../config/db.js"; // Assure-toi d'avoir ton pool PostgreSQL configuré
 
 // =======================================================
-// 📩 Envoyer message de contact par email
+// 📥 Enregistrer un message de contact dans la DB
 // =======================================================
 export const sendContactMessage = async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
+    // 🔹 Vérification des champs obligatoires
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -17,64 +16,28 @@ export const sendContactMessage = async (req, res) => {
       });
     }
 
-    // 🔐 Vérification de la configuration Gmail
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      console.error("❌ Gmail non configuré correctement. Vérifie GMAIL_USER et GMAIL_APP_PASSWORD dans le .env");
-      return res.status(500).json({
-        success: false,
-        message: "Erreur de configuration du serveur mail"
-      });
-    } else(console.log(process.env.GMAIL_USER, process.env.GMAIL_APP_PASSWORD))
+    // 🔹 Insertion dans la table contact_messages
+    const query = `
+      INSERT INTO contact_messages (name, email, subject, message)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, name, email, subject, message, created_at
+    `;
 
-    // 🔐 Transport Gmail
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // Utilisez true pour le port 465
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
+    const values = [name, email, subject || "", message];
 
-    if(transporter){
-      console.log('transporter OK')
-    }
+    const { rows } = await pool.query(query, values);
 
-    // Test de connexion SMTP avant envoi
-    await transporter.verify().catch(err => {
-      console.error("❌ Erreur de connexion SMTP :", err);
-      throw new Error("Impossible de se connecter au serveur SMTP. Vérifie ton mot de passe Gmail d’application.");
-    });
-
-    const mailOptions = {
-      from: `"Formulaire Contact AVANTI" <${process.env.GMAIL_USER}>`,
-      to: "karimduval20@gmail.com", // 🎯 destination finale
-      replyTo: email,
-      subject: subject || "Nouveau message depuis le site AVANTI",
-      html: `
-        <h2>Nouveau message de contact</h2>
-        <p><strong>Nom :</strong> ${name}</p>
-        <p><strong>Email :</strong> ${email}</p>
-        <p><strong>Sujet :</strong> ${subject || "(non renseigné)"}</p>
-        <hr />
-        <p>${message.replace(/\n/g, "<br>")}</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res.status(200).json({
+    res.status(201).json({
       success: true,
-      message: "Message envoyé avec succès 📩"
+      message: "Message enregistré avec succès ✅",
+      data: rows[0]
     });
 
   } catch (error) {
-    console.error("❌ Contact email error:", error.message);
-
+    console.error("❌ Contact DB error:", error);
     res.status(500).json({
       success: false,
-      message: `Erreur lors de l’envoi du message : ${error.message}`
+      message: "Erreur lors de l’enregistrement du message"
     });
   }
 };
