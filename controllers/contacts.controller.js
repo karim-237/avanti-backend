@@ -28,11 +28,13 @@ export const sendContactMessage = async (req, res) => {
 
     // 🔐 Transport Gmail
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // Utilisez true pour le port 465
       auth: {
         user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
-      }
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
     });
 
     // Test de connexion SMTP avant envoi
