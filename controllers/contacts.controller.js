@@ -35,9 +35,6 @@ export const sendContactMessage = async (req, res) => {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD,
       },
-      tls: {
-        rejectUnauthorized: false // Aide à contourner certains blocages de certificats locaux
-      }
     });
 
     // Test de connexion SMTP avant envoi
