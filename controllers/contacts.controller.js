@@ -15,13 +15,28 @@ export const sendContactMessage = async (req, res) => {
       });
     }
 
+    // 🔐 Vérification de la configuration Gmail
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      console.error("❌ Gmail non configuré correctement. Vérifie GMAIL_USER et GMAIL_APP_PASSWORD dans le .env");
+      return res.status(500).json({
+        success: false,
+        message: "Erreur de configuration du serveur mail"
+      });
+    }
+
     // 🔐 Transport Gmail
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.GMAIL_USER, // ex: avanticameroun@gmail.com
-        pass: process.env.GMAIL_APP_PASSWORD // mot de passe d'application
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD
       }
+    });
+
+    // Test de connexion SMTP avant envoi
+    await transporter.verify().catch(err => {
+      console.error("❌ Erreur de connexion SMTP :", err);
+      throw new Error("Impossible de se connecter au serveur SMTP. Vérifie ton mot de passe Gmail d’application.");
     });
 
     const mailOptions = {
@@ -47,11 +62,11 @@ export const sendContactMessage = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Contact email error:", error);
+    console.error("❌ Contact email error:", error.message);
 
     res.status(500).json({
       success: false,
-      message: "Erreur lors de l’envoi du message"
+      message: `Erreur lors de l’envoi du message : ${error.message}`
     });
   }
 };
