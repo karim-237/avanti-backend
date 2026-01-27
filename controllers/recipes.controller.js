@@ -20,7 +20,7 @@ export const getAllRecipes = async (req, res) => {
     // Filtre par tag
     if (tag) {
       whereClauses.push(`id IN (
-        SELECT recipe_id FROM recipe_tags rt
+        SELECT recipe_id FROM recipes_post_tags rt
         INNER JOIN tags t ON t.id = rt.tag_id
         WHERE t.slug = $${params.length + 1}
       )`);
