@@ -15,7 +15,9 @@ export const getAllBlogs = async (req, res) => {
         b.single_image,
         b.single_image_xl,
         b.author,
-        b.publish_date
+        b.publish_date,
+        c.name  AS category_name,
+        c.slug  AS category_slug
       FROM blogs b
       LEFT JOIN blog_categories c ON b.category_id = c.id
       LEFT JOIN blog_tags bt ON bt.blog_id = b.id
@@ -51,6 +53,7 @@ export const getAllBlogs = async (req, res) => {
     });
   }
 };
+
 
 
 
