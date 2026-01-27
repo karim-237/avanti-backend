@@ -70,7 +70,19 @@ export const getRecipeBySlug = async (req, res) => {
 
     const recipe = recipeResult.rows[0];
 
-    // 2️⃣ Commentaires de la recette
+    // 2️⃣ Tags associés à la recette
+    const { rows: tags } = await pool.query(
+      `
+      SELECT t.id, t.name, t.slug
+      FROM tags t
+      INNER JOIN recipe_tags rt ON rt.tag_id = t.id
+      WHERE rt.recipe_id = $1
+      ORDER BY t.name ASC
+      `,
+      [recipe.id]
+    );
+
+    // 3️⃣ Commentaires
     const { rows: comments } = await pool.query(
       `
       SELECT
@@ -86,7 +98,7 @@ export const getRecipeBySlug = async (req, res) => {
       [recipe.id]
     );
 
-    // 3️⃣ Autres recettes (suggestions)
+    // 4️⃣ Autres recettes
     const { rows: related } = await pool.query(
       `
       SELECT id, title, slug, image
@@ -102,6 +114,7 @@ export const getRecipeBySlug = async (req, res) => {
       success: true,
       data: {
         recipe,
+        tags,       // 👈 ajouté ici
         comments,
         related
       }
@@ -115,6 +128,7 @@ export const getRecipeBySlug = async (req, res) => {
     });
   }
 };
+
 
 // Récupérer toutes les catégories de recettes
 export const getRecipeCategories = async (req, res) => {
