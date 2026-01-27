@@ -46,7 +46,7 @@ app.use("/api/footer", footerRoutes);
 app.use("/api/contact-messages", contactMessagesRoutes);
 app.use("/api/site-contact", siteContactRoutes);
 app.use("/api/tags", tagRoutes);
-app.use('/api/blog-categories', blogCategoryRoutes);
+app.use('/api/categories', blogCategoryRoutes);
 app.use("/api/product-categories", productCategoriesRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api", searchRoutes);
