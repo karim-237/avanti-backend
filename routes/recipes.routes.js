@@ -18,11 +18,13 @@ router.get("/category/:slug", getRecipesByCategory);  // j'ai retiré "recipes" 
 // Liste des recettes
 router.get("/", getAllRecipes);
 
+// Liste des 5 dernières recettes
+router.get("/latest", getLatestRecipes);
+
 // Détail d'une recette
 router.get("/:slug", getRecipeBySlug);
 
-// Liste des 5 dernières recettes
-router.get("/latest", getLatestRecipes);
+
 
 
 export default router;
