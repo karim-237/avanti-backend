@@ -198,3 +198,33 @@ export const getRecipesByCategory = async (req, res) => {
     });
   }
 };
+
+
+// Récupérer les 5 dernières recettes publiées
+export const getLatestRecipes = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+
+    const { rows } = await pool.query(
+      `
+      SELECT id, title, slug, short_description, image, image_url, created_at
+      FROM recipes
+      WHERE status = 'published'
+      ORDER BY created_at DESC
+      LIMIT $1
+      `,
+      [limit]
+    );
+
+    res.status(200).json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error("Get latest recipes error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la récupération des dernières recettes"
+    });
+  }
+};

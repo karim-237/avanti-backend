@@ -3,7 +3,8 @@ import {
   getAllRecipes,
   getRecipeBySlug,
   getRecipeCategories,
-  getRecipesByCategory
+  getRecipesByCategory,
+  getLatestRecipes 
 } from "../controllers/recipes.controller.js";
 
 const router = express.Router();
@@ -19,6 +20,9 @@ router.get("/", getAllRecipes);
 
 // Détail d'une recette
 router.get("/:slug", getRecipeBySlug);
+
+// Liste des 5 dernières recettes
+router.get("/latest", getLatestRecipes);
 
 
 export default router;
