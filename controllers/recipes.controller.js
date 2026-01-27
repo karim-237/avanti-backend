@@ -75,7 +75,7 @@ export const getRecipeBySlug = async (req, res) => {
       `
       SELECT t.id, t.name, t.slug
       FROM tags t
-      INNER JOIN recipe_tags rt ON rt.tag_id = t.id
+      INNER JOIN recipes_post_tags rt ON rt.tag_id = t.id
       WHERE rt.recipe_id = $1
       ORDER BY t.name ASC
       `,
