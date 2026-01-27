@@ -3,7 +3,7 @@ import pool from "../config/db.js";
 // Récupérer tous les blogs
 export const getAllBlogs = async (req, res) => {
   try {
-    const { category, tag } = req.query;
+    const { category, tag, featured } = req.query;
 
     let query = `
       SELECT DISTINCT
@@ -16,6 +16,7 @@ export const getAllBlogs = async (req, res) => {
         b.single_image_xl,
         b.author,
         b.publish_date,
+        b.featured,                     -- 🔥 on récupère aussi le champ
         c.name  AS category_name,
         c.slug  AS category_slug
       FROM blogs b
@@ -27,14 +28,27 @@ export const getAllBlogs = async (req, res) => {
 
     const params = [];
 
+    // 🔹 Filtre catégorie
     if (category) {
       params.push(category);
       query += ` AND c.slug = $${params.length}`;
     }
 
+    // 🔹 Filtre tag
     if (tag) {
       params.push(tag);
       query += ` AND t.slug = $${params.length}`;
+    }
+
+    // 🔹 Filtre featured
+    if (featured !== undefined) {
+      const isFeatured =
+        featured === 'true' ||
+        featured === '1' ||
+        featured === true;
+
+      params.push(isFeatured);
+      query += ` AND b.featured = $${params.length}`;
     }
 
     query += ` ORDER BY b.publish_date DESC`;
@@ -53,6 +67,7 @@ export const getAllBlogs = async (req, res) => {
     });
   }
 };
+
 
 
 
