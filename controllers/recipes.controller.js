@@ -5,6 +5,28 @@ import pool from "../config/db.js";
    =============================== */
 export const getAllRecipes = async (req, res) => {
   try {
+    const { category, tag } = req.query; // on récupère les filtres
+    const params = [];
+    let whereClauses = [`status = 'published'`];
+
+    // Filtre par catégorie
+    if (category) {
+      whereClauses.push(`category_id = (
+        SELECT id FROM recipe_categories WHERE slug = $${params.length + 1} AND is_active = true
+      )`);
+      params.push(category);
+    }
+
+    // Filtre par tag
+    if (tag) {
+      whereClauses.push(`id IN (
+        SELECT recipe_id FROM recipe_tags rt
+        INNER JOIN tags t ON t.id = rt.tag_id
+        WHERE t.slug = $${params.length + 1}
+      )`);
+      params.push(tag);
+    }
+
     const query = `
       SELECT
         id,
@@ -15,11 +37,11 @@ export const getAllRecipes = async (req, res) => {
         image_url,
         created_at
       FROM recipes
-      WHERE status = 'published'
+      WHERE ${whereClauses.join(' AND ')}
       ORDER BY created_at DESC
     `;
 
-    const { rows } = await pool.query(query);
+    const { rows } = await pool.query(query, params);
 
     res.status(200).json({
       success: true,
@@ -33,6 +55,7 @@ export const getAllRecipes = async (req, res) => {
     });
   }
 };
+
 
 
 /* ===============================
