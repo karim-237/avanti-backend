@@ -211,7 +211,7 @@ export const getAllBlogsEn = async (req, res) => {
         bt.id,                          -- ID de la traduction
         bt.title,
         bt.short_description,
-        bt.slug,
+        b.slug,
         bt.image_url,
         b.publish_date,                 -- ✅ Vient de 'blogs'
         b.featured,                     -- ✅ Vient de 'blogs'
