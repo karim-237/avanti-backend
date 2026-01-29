@@ -274,7 +274,7 @@ export const getBlogBySlugEn = async (req, res) => {
     let blogRows;
 
     if (slug) {
-      const result = await pool.query(
+      const result = await pool.query( 
         `
         SELECT bt.id, bt.blog_id, bt.title, b.slug, bt.short_description,
                bt.full_content, b.image_url, b.single_image,
