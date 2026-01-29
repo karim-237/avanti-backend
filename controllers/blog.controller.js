@@ -369,29 +369,32 @@ export const getLatestBlogsEn = async (req, res) => {
     const { rows } = await pool.query(
       `
       SELECT 
-        id,
-        title,
-        slug,
-        short_description,
-        image_url,
-        publish_date
-      FROM blog_translations
-      WHERE status = 'published'
-        AND lang = 'en'
-      ORDER BY publish_date DESC
+        bt.id,
+        bt.title,
+        bt.slug,
+        bt.short_description,
+        b.image_url,        -- ✅ Récupéré de la table parente 'blogs'
+        b.publish_date      -- ✅ Récupéré de la table parente 'blogs'
+      FROM blog_translations bt
+      INNER JOIN blogs b ON bt.blog_id = b.id
+      WHERE b.status = 'published'
+        AND bt.lang = 'en'
+      ORDER BY b.publish_date DESC
       LIMIT 5
       `
     );
 
     res.status(200).json({
       success: true,
-      data: rows 
+      data: rows
     });
   } catch (error) {
     console.error("Get latest blogs EN error:", error);
     res.status(500).json({
       success: false,
-      message: "Error while fetching latest blogs"
+      message: "Error fetching latest blogs",
+      debug: error.message // Pour t'aider à débugger si une autre colonne manque
     });
   }
 };
+
