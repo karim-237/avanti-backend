@@ -335,7 +335,7 @@ export const getBlogBySlugEn = async (req, res) => {
 
     // 4️⃣ Articles à la une (EN)
     const { rows: featured } = await pool.query(
-      `SELECT bt.id, bt.title, bt.slug, bt.image_url
+      `SELECT bt.id, bt.title, bt.slug, b.image_url
        FROM blog_translations bt
        INNER JOIN blogs b ON bt.blog_id = b.id
        WHERE b.featured = TRUE 
