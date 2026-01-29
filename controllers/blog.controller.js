@@ -332,7 +332,7 @@ export const getBlogBySlugEn = async (req, res) => {
        ORDER BY created_at ASC`,
       [blog.blog_id]
     );
-
+ 
     // 4️⃣ Articles à la une (EN)
     const { rows: featured } = await pool.query(
       `SELECT bt.id, bt.title, bt.slug, b.image_url
