@@ -213,16 +213,14 @@ export const getAllBlogsEn = async (req, res) => {
         bt.short_description,
         bt.slug,
         bt.image_url,
-        bt.single_image,
-        bt.single_image_xl,
-        bt.author,
         bt.publish_date,
-        bt.featured,
+        b.featured,                     -- 🔥 On récupère le featured de la table parente
         c.name AS category_name,
         c.slug AS category_slug
       FROM blog_translations bt
+      INNER JOIN blogs b ON bt.blog_id = b.id       -- 🔗 Jointure avec la table parente
       LEFT JOIN blog_categories c ON bt.category_id = c.id
-      LEFT JOIN blog_tags btt ON btt.blog_id = bt.blog_id
+      LEFT JOIN blog_tags btt ON btt.blog_id = b.id  -- Jointure via l'ID parent
       LEFT JOIN tags t ON btt.tag_id = t.id
       WHERE bt.status = 'published'
         AND bt.lang = 'en'
@@ -240,14 +238,10 @@ export const getAllBlogsEn = async (req, res) => {
       query += ` AND t.slug = $${params.length}`;
     }
 
-    if (featured !== undefined) {
-      const isFeatured =
-        featured === "true" ||
-        featured === "1" ||
-        featured === true;
-
+     if (featured !== undefined) {
+      const isFeatured = (featured === 'true' || featured === '1' || featured === true);
       params.push(isFeatured);
-      query += ` AND bt.featured = $${params.length}`;
+      query += ` AND b.featured = $${params.length}`; // On filtre sur la table b
     }
 
     query += ` ORDER BY bt.publish_date DESC`;
