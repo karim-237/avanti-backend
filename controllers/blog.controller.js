@@ -386,7 +386,7 @@ export const getLatestBlogsEn = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: rows
+      data: rows 
     });
   } catch (error) {
     console.error("Get latest blogs EN error:", error);
