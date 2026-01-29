@@ -16,7 +16,7 @@ export const getAllRecipes = async (req, res) => {
       )`);
       params.push(category);
     }
- 
+
     // Filtre par tag
     if (tag) {
       whereClauses.push(`id IN (
@@ -268,7 +268,7 @@ export const getLatestRecipes = async (req, res) => {
 
 
 
-// 
+//  Toutes les recettes en anglais
 
 export const getAllRecipesEn = async (req, res) => {
   try {
@@ -279,26 +279,28 @@ export const getAllRecipesEn = async (req, res) => {
       "rt.lang = 'en'"
     ];
 
+    // 🔹 Filtre par catégorie traduite
     if (category) {
+      params.push(category);
       whereClauses.push(`
         r.category_id = (
-          SELECT id FROM recipe_categories
-          WHERE slug = $${params.length + 1} AND is_active = true
+          SELECT category_id FROM recipe_category_translations
+          WHERE slug = $${params.length} AND lang = 'en'
         )
       `);
-      params.push(category);
     }
 
+    // 🔹 Filtre par tag traduit
     if (tag) {
+      params.push(tag);
       whereClauses.push(`
         r.id IN (
-          SELECT recipe_id
+          SELECT rpt.recipe_id
           FROM recipes_post_tags rpt
-          JOIN tags t ON t.id = rpt.tag_id
-          WHERE t.slug = $${params.length + 1}
+          JOIN tag_translations tt ON tt.tag_id = rpt.tag_id
+          WHERE tt.slug = $${params.length} AND tt.lang = 'en'
         )
       `);
-      params.push(tag);
     }
 
     const query = `
@@ -310,28 +312,25 @@ export const getAllRecipesEn = async (req, res) => {
         rt.short_description,
         r.image,
         r.image_url,
-        r.created_at
+        r.created_at,
+        rct.name AS category_name -- Pour afficher le badge
       FROM recipe_translations rt
       JOIN recipes r ON r.id = rt.recipe_id
+      LEFT JOIN recipe_category_translations rct ON r.category_id = rct.category_id AND rct.lang = 'en'
       WHERE ${whereClauses.join(" AND ")}
       ORDER BY r.created_at DESC
     `;
 
     const { rows } = await pool.query(query, params);
-
     res.status(200).json({ success: true, data: rows });
   } catch (error) {
-    console.error("Get all recipes EN error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching recipes"
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 
 
-//
+// Détail d'une recette en anglais
 
 export const getRecipeBySlugEn = async (req, res) => {
   const { slug } = req.params;
@@ -371,12 +370,12 @@ export const getRecipeBySlugEn = async (req, res) => {
     // Tags
     const { rows: tags } = await pool.query(
       `
-      SELECT t.id, t.name, t.slug
-      FROM tags t
-      JOIN recipes_post_tags rpt ON rpt.tag_id = t.id
-      WHERE rpt.recipe_id = $1
-      ORDER BY t.name ASC
-      `,
+  SELECT tt.tag_id AS id, tt.name, tt.slug
+  FROM tag_translations tt
+  JOIN recipes_post_tags rpt ON rpt.tag_id = tt.tag_id
+  WHERE rpt.recipe_id = $1 AND tt.lang = 'en'
+  ORDER BY tt.name ASC
+  `,
       [recipe.recipe_id]
     );
 
@@ -424,7 +423,7 @@ export const getRecipeBySlugEn = async (req, res) => {
 };
 
 
-//
+// Les 5 dernières recettes en anglais
 export const getLatestRecipesEn = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
@@ -455,5 +454,23 @@ export const getLatestRecipesEn = async (req, res) => {
       success: false,
       message: "Error fetching latest recipes"
     });
+  }
+};
+
+
+
+// Catégories de recette en anglais
+
+export const getRecipeCategoriesEn = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT category_id AS id, name, slug 
+       FROM recipe_category_translations 
+       WHERE lang = 'en' 
+       ORDER BY name ASC`
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };

@@ -7,7 +7,8 @@ import {
   getLatestRecipes,
   getAllRecipesEn,
   getRecipeBySlugEn,
-  getLatestRecipesEn
+  getLatestRecipesEn,
+  getRecipeCategoriesEn
 } from "../controllers/recipes.controller.js";
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.get("/:slug", getRecipeBySlug);
 // 🇬🇧
 router.get("/en", getAllRecipesEn);
 router.get("/en/latest", getLatestRecipesEn);
+router.get("/en/recipe-categories", getRecipeCategoriesEn);
 router.get("/en/:slug", getRecipeBySlugEn);
 
 export default router;
