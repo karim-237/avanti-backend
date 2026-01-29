@@ -285,7 +285,7 @@ export const getBlogBySlugEn = async (req, res) => {
         FROM blog_translations bt
         LEFT JOIN authors a ON bt.author_id = a.id
         WHERE b.slug = $1
-          AND bt.status = 'published'
+          AND b.status = 'published'
           AND bt.lang = 'en'
         `,
         [slug]
