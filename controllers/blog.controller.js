@@ -272,90 +272,92 @@ export const getBlogBySlugEn = async (req, res) => {
   const { slug } = req.params;
 
   try {
-    let blogRows;
+    // 1️⃣ Récupération du contenu du blog (Traductions + Data structurelle)
+    const result = await pool.query(
+      `
+      SELECT 
+        bt.id, 
+        bt.blog_id, 
+        bt.title, 
+        bt.slug, 
+        bt.short_description,
+        bt.full_content, 
+        bt.image_url, 
+        bt.single_image,
+        bt.single_image_xl, 
+        bt.image_secondary,
+        bt.paragraph_1, 
+        bt.paragraph_2, 
+        bt.author_bio,
+        bt.quote, 
+        b.publish_date,    -- Table parente
+        b.featured,        -- Table parente
+        a.name AS author_name, 
+        a.photo_url AS author_photo, 
+        a.position AS author_position
+      FROM blog_translations bt
+      INNER JOIN blogs b ON bt.blog_id = b.id
+      LEFT JOIN authors a ON b.author_id = a.id
+      WHERE bt.slug = $1 
+        AND b.status = 'published'
+        AND bt.lang = 'en'
+      `,
+      [slug]
+    );
 
-    if (slug) {
-      const result = await pool.query( 
-        `
-        SELECT bt.id, bt.blog_id, bt.title, b.slug, bt.short_description,
-               bt.full_content, b.image_url, b.single_image,
-               b.single_image_xl, b.image_secondary,
-               bt.paragraph_1, bt.paragraph_2, bt.author_bio,
-               b.publish_date, bt.quote, b.featured,
-               a.name AS author_name, a.photo_url AS author_photo, a.position AS author_position
-        FROM blog_translations bt
-        LEFT JOIN authors a ON bt.author_id = a.id
-        WHERE b.slug = $1
-          AND b.status = 'published'
-          AND bt.lang = 'en'
-        `,
-        [slug]
-      );
-
-      blogRows = result.rows;
-    }
-
-    if (!blogRows || blogRows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Blog not found"
+        message: "Blog not found (EN)",
+        debug: `No record found for slug: ${slug}`
       });
     }
 
-    const blog = blogRows[0];
+    const blog = result.rows[0];
 
-    // Tags
+    // 2️⃣ Tags associés (Lien via blog_id parent)
     const { rows: tags } = await pool.query(
-      `
-      SELECT t.id, t.name, t.slug
-      FROM tags t
-      JOIN blog_tags btg ON btg.tag_id = t.id
-      WHERE btg.blog_id = $1
-      `,
+      `SELECT t.id, t.name, t.slug
+       FROM tags t
+       JOIN blog_tags bt_tag ON bt_tag.tag_id = t.id
+       WHERE bt_tag.blog_id = $1`,
       [blog.blog_id]
     );
 
-    // Commentaires (pas traduits)
+    // 3️⃣ Commentaires (Lien via blog_id parent)
     const { rows: comments } = await pool.query(
-      `
-      SELECT id, author_name, email, message, created_at
-      FROM comments
-      WHERE blog_id = $1
-      ORDER BY created_at ASC
-      `,
+      `SELECT id, author_name, email, message, created_at
+       FROM comments
+       WHERE blog_id = $1
+       ORDER BY created_at ASC`,
       [blog.blog_id]
     );
 
-    // Articles à la une
+    // 4️⃣ Articles à la une (EN)
     const { rows: featured } = await pool.query(
-      `
-      SELECT id, title, slug, image_url
-      FROM blog_translations
-      WHERE featured = TRUE
-        AND status = 'published'
-        AND lang = 'en'
-        AND blog_id != $1
-      ORDER BY publish_date DESC
-      LIMIT 4
-      `,
+      `SELECT bt.id, bt.title, bt.slug, bt.image_url
+       FROM blog_translations bt
+       INNER JOIN blogs b ON bt.blog_id = b.id
+       WHERE b.featured = TRUE 
+         AND b.status = 'published' 
+         AND bt.lang = 'en'
+         AND bt.blog_id != $1
+       ORDER BY b.publish_date DESC
+       LIMIT 4`,
       [blog.blog_id]
     );
 
     res.status(200).json({
       success: true,
-      data: {
-        blog,
-        tags,
-        comments,
-        featured
-      }
+      data: { blog, tags, comments, featured }
     });
 
   } catch (error) {
     console.error("Get blog by slug EN error:", error);
     res.status(500).json({
       success: false,
-      message: "Error while fetching blog"
+      message: "Error fetching single blog (EN)",
+      debug: error.message // 🔥 Ton message d'erreur SQL apparaîtra ici
     });
   }
 };
