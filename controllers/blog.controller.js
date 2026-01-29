@@ -208,21 +208,21 @@ export const getAllBlogsEn = async (req, res) => {
 
     let query = `
       SELECT DISTINCT
-        bt.id,
+        bt.id,                          -- ID de la traduction
         bt.title,
         bt.short_description,
         bt.slug,
         bt.image_url,
-        bt.publish_date,
-        b.featured,                     -- 🔥 On récupère le featured de la table parente
+        b.publish_date,                 -- ✅ Vient de 'blogs'
+        b.featured,                     -- ✅ Vient de 'blogs'
         c.name AS category_name,
         c.slug AS category_slug
       FROM blog_translations bt
-      INNER JOIN blogs b ON bt.blog_id = b.id       -- 🔗 Jointure avec la table parente
-      LEFT JOIN blog_categories c ON bt.category_id = c.id
-      LEFT JOIN blog_tags btt ON btt.blog_id = b.id  -- Jointure via l'ID parent
+      INNER JOIN blogs b ON bt.blog_id = b.id       
+      LEFT JOIN blog_categories c ON b.category_id = c.id  -- ✅ Jointure via 'b' car category_id est là
+      LEFT JOIN blog_tags btt ON btt.blog_id = b.id  
       LEFT JOIN tags t ON btt.tag_id = t.id
-      WHERE bt.status = 'published'
+      WHERE b.status = 'published'      -- ✅ Vient de 'blogs'
         AND bt.lang = 'en'
     `;
 
@@ -238,13 +238,13 @@ export const getAllBlogsEn = async (req, res) => {
       query += ` AND t.slug = $${params.length}`;
     }
 
-     if (featured !== undefined) {
+    if (featured !== undefined) {
       const isFeatured = (featured === 'true' || featured === '1' || featured === true);
       params.push(isFeatured);
-      query += ` AND b.featured = $${params.length}`; // On filtre sur la table b
+      query += ` AND b.featured = $${params.length}`;
     }
 
-    query += ` ORDER BY bt.publish_date DESC`;
+    query += ` ORDER BY b.publish_date DESC`;
 
     const { rows } = await pool.query(query, params);
 
@@ -253,10 +253,12 @@ export const getAllBlogsEn = async (req, res) => {
       data: rows
     });
   } catch (error) {
-    console.error("Get all blogs EN error:", error);
+    // Affiche l'erreur précise dans tes logs Render pour le debug
+    console.error("Détail de l'erreur SQL :", error.message);
     res.status(500).json({
       success: false,
-      message: "Error while fetching blogs"
+      message: "Erreur lors de la récupération des blogs (EN)",
+
     });
   }
 };
