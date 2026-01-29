@@ -231,7 +231,7 @@ export const getAllBlogsEn = async (req, res) => {
 
     if (category) {
       params.push(category);
-      query += ` AND c.slug = $${params.length}`;
+      query += ` AND ct.slug = $${params.length}`;
     }
 
     if (tag) {
