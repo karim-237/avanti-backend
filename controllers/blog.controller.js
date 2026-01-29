@@ -258,7 +258,7 @@ export const getAllBlogsEn = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Erreur lors de la récupération des blogs (EN)",
-
+      debug: error.message // À retirer en production pour la sécurité
     });
   }
 };
