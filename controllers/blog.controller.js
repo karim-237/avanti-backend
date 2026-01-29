@@ -315,9 +315,9 @@ export const getBlogBySlugEn = async (req, res) => {
 
     const blog = result.rows[0];
 
-   // 2️⃣ Tags associés en version anglaise
-const { rows: tags } = await pool.query(
-  `SELECT 
+    // 2️⃣ Tags associés en version anglaise
+    const { rows: tags } = await pool.query(
+      `SELECT 
       t.id, 
       tt.name,        -- Nom traduit (anglais)
       tt.slug         -- Slug traduit (anglais)
@@ -326,8 +326,8 @@ const { rows: tags } = await pool.query(
    JOIN blog_tags bt_tag ON bt_tag.tag_id = t.id
    WHERE bt_tag.blog_id = $1 
      AND tt.lang = 'en'`,
-  [blog.blog_id] // blog_id provient de la table blogs parente
-);
+      [blog.blog_id] // blog_id provient de la table blogs parente
+    );
 
     // 3️⃣ Commentaires (Lien via blog_id parent)
     const { rows: comments } = await pool.query(
@@ -337,7 +337,7 @@ const { rows: tags } = await pool.query(
        ORDER BY created_at ASC`,
       [blog.blog_id]
     );
- 
+
     // 4️⃣ Articles à la une (EN)
     const { rows: featured } = await pool.query(
       `SELECT bt.id, bt.title, bt.slug, b.image_url
