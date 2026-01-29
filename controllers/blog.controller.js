@@ -277,10 +277,10 @@ export const getBlogBySlugEn = async (req, res) => {
       const result = await pool.query(
         `
         SELECT bt.id, bt.blog_id, bt.title, b.slug, bt.short_description,
-               bt.full_content, bt.image_url, bt.single_image,
-               bt.single_image_xl, bt.image_secondary,
+               bt.full_content, b.image_url, b.single_image,
+               b.single_image_xl, b.image_secondary,
                bt.paragraph_1, bt.paragraph_2, bt.author_bio,
-               bt.publish_date, bt.quote, bt.featured,
+               b.publish_date, bt.quote, b.featured,
                a.name AS author_name, a.photo_url AS author_photo, a.position AS author_position
         FROM blog_translations bt
         LEFT JOIN authors a ON bt.author_id = a.id
