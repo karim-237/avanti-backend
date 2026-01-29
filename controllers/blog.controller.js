@@ -315,14 +315,19 @@ export const getBlogBySlugEn = async (req, res) => {
 
     const blog = result.rows[0];
 
-    // 2️⃣ Tags associés (Lien via blog_id parent)
-    const { rows: tags } = await pool.query(
-      `SELECT t.id, t.name, t.slug
-       FROM tags t
-       JOIN blog_tags bt_tag ON bt_tag.tag_id = t.id
-       WHERE bt_tag.blog_id = $1`,
-      [blog.blog_id]
-    );
+   // 2️⃣ Tags associés en version anglaise
+const { rows: tags } = await pool.query(
+  `SELECT 
+      t.id, 
+      tt.name,        -- Nom traduit (anglais)
+      tt.slug         -- Slug traduit (anglais)
+   FROM tags t
+   JOIN tag_translations tt ON t.id = tt.tag_id
+   JOIN blog_tags bt_tag ON bt_tag.tag_id = t.id
+   WHERE bt_tag.blog_id = $1 
+     AND tt.lang = 'en'`,
+  [blog.blog_id] // blog_id provient de la table blogs parente
+);
 
     // 3️⃣ Commentaires (Lien via blog_id parent)
     const { rows: comments } = await pool.query(
