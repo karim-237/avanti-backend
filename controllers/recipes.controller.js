@@ -305,7 +305,7 @@ export const getAllRecipesEn = async (req, res) => {
 
     const query = `
       SELECT
-        rt.id,
+        rt.id AS translation_id,
         rt.recipe_id,
         rt.title,
         rt.slug,
@@ -313,9 +313,9 @@ export const getAllRecipesEn = async (req, res) => {
         r.image,
         r.image_url,
         r.created_at,
-        rct.name AS category_name -- Pour afficher le badge
+        rct.name AS category_name
       FROM recipe_translations rt
-      JOIN recipes r ON r.id = rt.recipe_id
+      INNER JOIN recipes r ON r.id = rt.recipe_id
       LEFT JOIN recipe_category_translations rct ON r.category_id = rct.category_id AND rct.lang = 'en'
       WHERE ${whereClauses.join(" AND ")}
       ORDER BY r.created_at DESC
@@ -324,7 +324,13 @@ export const getAllRecipesEn = async (req, res) => {
     const { rows } = await pool.query(query, params);
     res.status(200).json({ success: true, data: rows });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Get all recipes EN error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching recipes (EN)",
+      debug: error.message, // 🔥 Affiche l'erreur SQL réelle
+      stack: error.stack     // Pour localiser la ligne exacte du crash
+    });
   }
 };
 
