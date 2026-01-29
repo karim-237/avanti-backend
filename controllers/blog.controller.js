@@ -208,21 +208,22 @@ export const getAllBlogsEn = async (req, res) => {
 
     let query = `
       SELECT DISTINCT
-        bt.id,                          -- ID de la traduction
+        bt.id,
         bt.title,
         bt.short_description,
-        b.slug,
+        bt.slug,                         -- Slug anglais (depuis bt)
         b.image_url,
-        b.publish_date,                 -- ✅ Vient de 'blogs'
-        b.featured,                     -- ✅ Vient de 'blogs'
-        c.name AS category_name,
-        c.slug AS category_slug
+        b.publish_date,
+        b.featured,
+        ct.name AS category_name,        -- Nom anglais
+        ct.slug AS category_slug         -- Slug anglais
       FROM blog_translations bt
-      INNER JOIN blogs b ON bt.blog_id = b.id       
-      LEFT JOIN blog_categories c ON b.category_id = c.id  -- ✅ Jointure via 'b' car category_id est là
-      LEFT JOIN blog_tags btt ON btt.blog_id = b.id  
+      INNER JOIN blogs b ON bt.blog_id = b.id
+      -- Jointure avec les traductions de catégories
+      LEFT JOIN blog_category_translations ct ON b.category_id = ct.category_id AND ct.lang = 'en'
+      LEFT JOIN blog_tags btt ON btt.blog_id = b.id
       LEFT JOIN tags t ON btt.tag_id = t.id
-      WHERE b.status = 'published'      -- ✅ Vient de 'blogs'
+      WHERE b.status = 'published'
         AND bt.lang = 'en'
     `;
 
