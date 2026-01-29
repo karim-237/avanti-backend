@@ -30,7 +30,7 @@ export const getAllTagsEn = async (req, res) => {
        FROM tag_translations
        WHERE lang = 'en'
        ORDER BY name ASC`
-    );
+    ); 
 
     res.status(200).json({
       success: true,

@@ -211,18 +211,19 @@ export const getAllBlogsEn = async (req, res) => {
         bt.id,
         bt.title,
         bt.short_description,
-        bt.slug,                         -- Slug anglais (depuis bt)
+        bt.slug,
         b.image_url,
         b.publish_date,
         b.featured,
-        ct.name AS category_name,        -- Nom anglais
-        ct.slug AS category_slug         -- Slug anglais
+        ct.name AS category_name,
+        ct.slug AS category_slug
       FROM blog_translations bt
       INNER JOIN blogs b ON bt.blog_id = b.id
-      -- Jointure avec les traductions de catégories
       LEFT JOIN blog_category_translations ct ON b.category_id = ct.category_id AND ct.lang = 'en'
       LEFT JOIN blog_tags btt ON btt.blog_id = b.id
       LEFT JOIN tags t ON btt.tag_id = t.id
+      -- 🏷️ AJOUT : Jointure pour récupérer les slugs de tags anglais
+      LEFT JOIN tag_translations tt ON t.id = tt.tag_id AND tt.lang = 'en'
       WHERE b.status = 'published'
         AND bt.lang = 'en'
     `;
@@ -236,7 +237,8 @@ export const getAllBlogsEn = async (req, res) => {
 
     if (tag) {
       params.push(tag);
-      query += ` AND t.slug = $${params.length}`;
+      // ✅ CORRECTION : On filtre sur tt.slug (anglais) et non t.slug (français)
+      query += ` AND tt.slug = $${params.length}`;
     }
 
     if (featured !== undefined) {
@@ -249,17 +251,13 @@ export const getAllBlogsEn = async (req, res) => {
 
     const { rows } = await pool.query(query, params);
 
-    res.status(200).json({
-      success: true,
-      data: rows
-    });
+    res.status(200).json({ success: true, data: rows });
   } catch (error) {
-    // Affiche l'erreur précise dans tes logs Render pour le debug
     console.error("Détail de l'erreur SQL :", error.message);
     res.status(500).json({
       success: false,
       message: "Erreur lors de la récupération des blogs (EN)",
-      debug: error.message // À retirer en production pour la sécurité
+      debug: error.message
     });
   }
 };
