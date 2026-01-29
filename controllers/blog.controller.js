@@ -198,3 +198,201 @@ export const getLatestBlogs = async (req, res) => {
   }
 };
 
+
+
+
+// 🇬🇧 Récupérer tous les blogs (EN)
+export const getAllBlogsEn = async (req, res) => {
+  try {
+    const { category, tag, featured } = req.query;
+
+    let query = `
+      SELECT DISTINCT
+        bt.id,
+        bt.title,
+        bt.short_description,
+        bt.slug,
+        bt.image_url,
+        bt.single_image,
+        bt.single_image_xl,
+        bt.author,
+        bt.publish_date,
+        bt.featured,
+        c.name AS category_name,
+        c.slug AS category_slug
+      FROM blog_translations bt
+      LEFT JOIN blog_categories c ON bt.category_id = c.id
+      LEFT JOIN blog_tags btt ON btt.blog_id = bt.blog_id
+      LEFT JOIN tags t ON btt.tag_id = t.id
+      WHERE bt.status = 'published'
+        AND bt.lang = 'en'
+    `;
+
+    const params = [];
+
+    if (category) {
+      params.push(category);
+      query += ` AND c.slug = $${params.length}`;
+    }
+
+    if (tag) {
+      params.push(tag);
+      query += ` AND t.slug = $${params.length}`;
+    }
+
+    if (featured !== undefined) {
+      const isFeatured =
+        featured === "true" ||
+        featured === "1" ||
+        featured === true;
+
+      params.push(isFeatured);
+      query += ` AND bt.featured = $${params.length}`;
+    }
+
+    query += ` ORDER BY bt.publish_date DESC`;
+
+    const { rows } = await pool.query(query, params);
+
+    res.status(200).json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error("Get all blogs EN error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error while fetching blogs"
+    });
+  }
+};
+
+
+//
+
+// 🇬🇧 Récupérer un blog par slug (EN)
+export const getBlogBySlugEn = async (req, res) => {
+  const { slug } = req.params;
+
+  try {
+    let blogRows;
+
+    if (slug) {
+      const result = await pool.query(
+        `
+        SELECT bt.id, bt.blog_id, bt.title, bt.slug, bt.short_description,
+               bt.full_content, bt.image_url, bt.single_image,
+               bt.single_image_xl, bt.image_secondary,
+               bt.paragraph_1, bt.paragraph_2, bt.author_bio,
+               bt.publish_date, bt.quote, bt.featured,
+               a.name AS author_name, a.photo_url AS author_photo, a.position AS author_position
+        FROM blog_translations bt
+        LEFT JOIN authors a ON bt.author_id = a.id
+        WHERE bt.slug = $1
+          AND bt.status = 'published'
+          AND bt.lang = 'en'
+        `,
+        [slug]
+      );
+
+      blogRows = result.rows;
+    }
+
+    if (!blogRows || blogRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found"
+      });
+    }
+
+    const blog = blogRows[0];
+
+    // Tags
+    const { rows: tags } = await pool.query(
+      `
+      SELECT t.id, t.name, t.slug
+      FROM tags t
+      JOIN blog_tags btg ON btg.tag_id = t.id
+      WHERE btg.blog_id = $1
+      `,
+      [blog.blog_id]
+    );
+
+    // Commentaires (pas traduits)
+    const { rows: comments } = await pool.query(
+      `
+      SELECT id, author_name, email, message, created_at
+      FROM comments
+      WHERE blog_id = $1
+      ORDER BY created_at ASC
+      `,
+      [blog.blog_id]
+    );
+
+    // Articles à la une
+    const { rows: featured } = await pool.query(
+      `
+      SELECT id, title, slug, image_url
+      FROM blog_translations
+      WHERE featured = TRUE
+        AND status = 'published'
+        AND lang = 'en'
+        AND blog_id != $1
+      ORDER BY publish_date DESC
+      LIMIT 4
+      `,
+      [blog.blog_id]
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        blog,
+        tags,
+        comments,
+        featured
+      }
+    });
+
+  } catch (error) {
+    console.error("Get blog by slug EN error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error while fetching blog"
+    });
+  }
+};
+
+
+// 🇬🇧 Récupérer les 5 derniers blogs (EN)
+export const getLatestBlogsEn = async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT 
+        id,
+        title,
+        slug,
+        short_description,
+        image_url,
+        publish_date
+      FROM blog_translations
+      WHERE status = 'published'
+        AND lang = 'en'
+      ORDER BY publish_date DESC
+      LIMIT 5
+      `
+    );
+
+    res.status(200).json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error("Get latest blogs EN error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error while fetching latest blogs"
+    });
+  }
+};

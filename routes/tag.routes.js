@@ -1,8 +1,12 @@
 import express from "express";
-import { getAllTags } from "../controllers/tag.controller.js";
+import { getAllTags, getAllTagsEn } from "../controllers/tag.controller.js";
 
 const router = express.Router();
 
-router.get("/", getAllTags);  // /api/tags
+// 🇫🇷
+router.get("/", getAllTags);
+
+// 🇬🇧
+router.get("/en", getAllTagsEn);
 
 export default router;

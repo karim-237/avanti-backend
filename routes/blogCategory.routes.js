@@ -1,8 +1,15 @@
 import express from 'express';
-import { getCategories } from '../controllers/blogCategory.controller.js';
+import {
+  getCategories,
+  getCategoriesEn
+} from '../controllers/blogCategory.controller.js';
 
 const router = express.Router();
 
+// 🇫🇷
 router.get('/', getCategories);
+
+// 🇬🇧
+router.get('/en', getCategoriesEn);
 
 export default router;

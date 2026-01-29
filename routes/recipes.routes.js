@@ -4,30 +4,24 @@ import {
   getRecipeBySlug,
   getRecipeCategories,
   getRecipesByCategory,
-  getLatestRecipes 
+  getLatestRecipes,
+  getAllRecipesEn,
+  getRecipeBySlugEn,
+  getLatestRecipesEn
 } from "../controllers/recipes.controller.js";
 
 const router = express.Router();
 
-
-// Liste des recettes
+// 🇫🇷
 router.get("/", getAllRecipes);
-
-// Liste des 5 dernières recettes
 router.get("/latest", getLatestRecipes);
-
-// Récupérer les catégories
 router.get("/recipe-categories", getRecipeCategories);
-
-// Récupérer les recettes par catégorie (slug)
-router.get("/category/:slug", getRecipesByCategory);  // j'ai retiré "recipes" car c'est déjà sous "/api/recipes"
-
-
-
-// Détail d'une recette
+router.get("/category/:slug", getRecipesByCategory);
 router.get("/:slug", getRecipeBySlug);
 
-
-
+// 🇬🇧
+router.get("/en", getAllRecipesEn);
+router.get("/en/latest", getLatestRecipesEn);
+router.get("/en/:slug", getRecipeBySlugEn);
 
 export default router;

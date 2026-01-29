@@ -16,7 +16,7 @@ export const getAllRecipes = async (req, res) => {
       )`);
       params.push(category);
     }
-
+ 
     // Filtre par tag
     if (tag) {
       whereClauses.push(`id IN (
@@ -262,6 +262,198 @@ export const getLatestRecipes = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Erreur lors de la récupération des dernières recettes"
+    });
+  }
+};
+
+
+
+// 
+
+export const getAllRecipesEn = async (req, res) => {
+  try {
+    const { category, tag } = req.query;
+    const params = [];
+    let whereClauses = [
+      "r.status = 'published'",
+      "rt.lang = 'en'"
+    ];
+
+    if (category) {
+      whereClauses.push(`
+        r.category_id = (
+          SELECT id FROM recipe_categories
+          WHERE slug = $${params.length + 1} AND is_active = true
+        )
+      `);
+      params.push(category);
+    }
+
+    if (tag) {
+      whereClauses.push(`
+        r.id IN (
+          SELECT recipe_id
+          FROM recipes_post_tags rpt
+          JOIN tags t ON t.id = rpt.tag_id
+          WHERE t.slug = $${params.length + 1}
+        )
+      `);
+      params.push(tag);
+    }
+
+    const query = `
+      SELECT
+        rt.id,
+        rt.recipe_id,
+        rt.title,
+        rt.slug,
+        rt.short_description,
+        r.image,
+        r.image_url,
+        r.created_at
+      FROM recipe_translations rt
+      JOIN recipes r ON r.id = rt.recipe_id
+      WHERE ${whereClauses.join(" AND ")}
+      ORDER BY r.created_at DESC
+    `;
+
+    const { rows } = await pool.query(query, params);
+
+    res.status(200).json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Get all recipes EN error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching recipes"
+    });
+  }
+};
+
+
+
+//
+
+export const getRecipeBySlugEn = async (req, res) => {
+  const { slug } = req.params;
+
+  try {
+    const recipeResult = await pool.query(
+      `
+      SELECT
+        rt.id,
+        rt.recipe_id,
+        rt.title,
+        rt.slug,
+        rt.short_description,
+        rt.paragraph_1,
+        rt.paragraph_2,
+        rt.content,
+        r.image,
+        r.created_at
+      FROM recipe_translations rt
+      JOIN recipes r ON r.id = rt.recipe_id
+      WHERE rt.slug = $1
+        AND rt.lang = 'en'
+        AND r.status = 'published'
+      `,
+      [slug]
+    );
+
+    if (recipeResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Recipe not found"
+      });
+    }
+
+    const recipe = recipeResult.rows[0];
+
+    // Tags
+    const { rows: tags } = await pool.query(
+      `
+      SELECT t.id, t.name, t.slug
+      FROM tags t
+      JOIN recipes_post_tags rpt ON rpt.tag_id = t.id
+      WHERE rpt.recipe_id = $1
+      ORDER BY t.name ASC
+      `,
+      [recipe.recipe_id]
+    );
+
+    // Commentaires
+    const { rows: comments } = await pool.query(
+      `
+      SELECT id, name, email, comment, created_at
+      FROM recipe_comments
+      WHERE recipe_id = $1 AND status = 'approved'
+      ORDER BY created_at ASC
+      `,
+      [recipe.recipe_id]
+    );
+
+    // Recettes liées
+    const { rows: related } = await pool.query(
+      `
+      SELECT
+        rt.title,
+        rt.slug,
+        r.image
+      FROM recipe_translations rt
+      JOIN recipes r ON r.id = rt.recipe_id
+      WHERE r.status = 'published'
+        AND rt.lang = 'en'
+        AND r.id != $1
+      ORDER BY r.created_at DESC
+      LIMIT 4
+      `,
+      [recipe.recipe_id]
+    );
+
+    res.status(200).json({
+      success: true,
+      data: { recipe, tags, comments, related }
+    });
+
+  } catch (error) {
+    console.error("Get recipe by slug EN error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching recipe"
+    });
+  }
+};
+
+
+//
+export const getLatestRecipesEn = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+
+    const { rows } = await pool.query(
+      `
+      SELECT
+        rt.title,
+        rt.slug,
+        rt.short_description,
+        r.image,
+        r.image_url,
+        r.created_at
+      FROM recipe_translations rt
+      JOIN recipes r ON r.id = rt.recipe_id
+      WHERE r.status = 'published'
+        AND rt.lang = 'en'
+      ORDER BY r.created_at DESC
+      LIMIT $1
+      `,
+      [limit]
+    );
+
+    res.status(200).json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Get latest recipes EN error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching latest recipes"
     });
   }
 };
