@@ -109,20 +109,23 @@ export const getProductsEn = async (req, res) => {
         pt.slug,
         pt.description,
         p.image_path,
-        c.slug AS category_slug
+        pct.slug AS category_slug
       FROM product_translations pt
       JOIN products p ON p.id = pt.product_id
       JOIN product_categories c ON c.id = p.category_id
+      JOIN product_category_translations pct 
+        ON pct.category_id = c.id
+       AND pct.lang = 'en'
       WHERE p.active = true
         AND pt.lang = 'en'
     `;
 
     const params = [];
 
-    // Filtre catégorie (slug traduit)
+    // ✅ Filtre catégorie EN (slug traduit)
     if (category) {
       params.push(category);
-      query += ` AND c.slug = $${params.length}`;
+      query += ` AND pct.slug = $${params.length}`;
     }
 
     params.push(limit);
@@ -142,6 +145,7 @@ export const getProductsEn = async (req, res) => {
     });
   }
 };
+
 
 
 // 🇬🇧 Get product by slug (EN)
@@ -188,7 +192,7 @@ export const getProductsBySlugEn = async (req, res) => {
     res.status(200).json({
       success: true,
       data: result.rows
-    });
+    }); 
   } catch (error) {
     console.error("Get product by slug EN error:", error);
     res.status(500).json({
