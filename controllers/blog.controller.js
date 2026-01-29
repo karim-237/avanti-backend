@@ -212,7 +212,7 @@ export const getAllBlogsEn = async (req, res) => {
         bt.title,
         bt.short_description,
         b.slug,
-        bt.image_url,
+        b.image_url,
         b.publish_date,                 -- ✅ Vient de 'blogs'
         b.featured,                     -- ✅ Vient de 'blogs'
         c.name AS category_name,
