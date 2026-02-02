@@ -24,6 +24,8 @@ import commentRoutes from "./routes/comment.routes.js";
 import recipe_commentRoutes from "./routes/recipe_comment.routes.js";
 import contactRoutes from "./routes/contacts.routes.js";
 import getTranslatedSlug from "./routes/translation.routes.js"
+import newsletterRoutes from "./routes/newsletter_section.routes.js";
+
 
 
 
@@ -57,6 +59,8 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/recipe_comments", recipe_commentRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/", getTranslatedSlug);
+app.use("/api", newsletterRoutes);
+
 
 
 
