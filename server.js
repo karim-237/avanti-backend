@@ -59,7 +59,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/recipe_comments", recipe_commentRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/", getTranslatedSlug);
-app.use("/api", newsletterRoutes);
+app.use("/api", newsletterRoutes); 
 
 
 
