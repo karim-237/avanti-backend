@@ -1,7 +1,7 @@
 import pool from "../config/db.js";
 
 /**
- * 🇫🇷 ABOUT - Français
+ * 🇫🇷 ABOUT - Français 
  */
 export const getAboutSection = async (req, res) => {
     try {
