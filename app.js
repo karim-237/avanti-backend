@@ -34,10 +34,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// toutes les routes...
+// ROUTES API
+
 app.use("/api/site-settings", siteSettingsRoutes);
-app.use("/api/social-links", socialLinksRoutes);
-// etc...
+app.use("/api/social-links", socialLinksRoutes); 
+app.use("/api/home-banners", homeBannersRoutes); 
+app.use("/api/discount-sections", discountSectionsRoutes); 
+app.use("/api/choose-section", chooseSectionRoutes); 
+app.use("/api/products", productSectionRoutes); 
+app.use("/api/about", aboutSectionRoutes); 
+app.use("/api/blogs", blogRoutes); 
+app.use("/api/newsletter", newsletterRoutes); 
+app.use("/api/footer", footerRoutes); 
+app.use("/api/contact-messages", contactMessagesRoutes); 
+app.use("/api/site-contact", siteContactRoutes);
+app.use("/api/tags", tagRoutes); 
+app.use('/api/categories', blogCategoryRoutes); 
+app.use("/api/product-categories", productCategoriesRoutes); 
+app.use("/api/recipes", recipeRoutes); 
+app.use("/api", searchRoutes); 
+app.use("/api/search/blogs", searchBlogsRoutes); 
+app.use("/api/search/recipes", searchRecipesRoutes); 
+app.use("/api/comments", commentRoutes); 
+app.use("/api/recipe_comments", recipe_commentRoutes); 
+app.use("/api/contact", contactRoutes); app.use("/api/", getTranslatedSlug); 
+app.use("/api", newsletter_sectionRoutes);
 
 app.get("/health", (req, res) => {
   res.json({
