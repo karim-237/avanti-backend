@@ -48,20 +48,27 @@ export const updateSiteSettings = async (req, res) => {
 // Upload logo/favicon
 export const uploadLogoOrFavicon = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
-    // Upload sur Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "avanti/site_settings"
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: "avanti/site_settings"
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(req.file.buffer);
     });
-
-    // Supprimer le fichier local après upload
-    fs.unlinkSync(req.file.path);
 
     res.json({
       message: "File uploaded successfully",
       url: result.secure_url
     });
+
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ error: error.message });
